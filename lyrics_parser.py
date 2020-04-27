@@ -23,13 +23,16 @@ class GeniusApi():
             #f = open('api-data.json', 'r')
             #api_data = f.read()
             #data = json.loads(api_data)
-            for hit in data["response"]["hits"]:
-                if hit["result"]["primary_artist"]["name"] == self.artist:
-                    song_info = hit
-                    break
-            if song_info:
-                song_api_path = song_info["result"]["api_path"]
-                return song_api_path
+            try:
+                for hit in data["response"]["hits"]:
+                    if hit["result"]["primary_artist"]["name"] == self.artist:
+                        song_info = hit
+                        break
+                if song_info:
+                    song_api_path = song_info["result"]["api_path"]
+                    return song_api_path
+            except Exception:
+                return None
         else:
             print("Request Failed!")
             # print(response.text)
@@ -57,7 +60,14 @@ if __name__ == "__main__":
     load_dotenv(env_file)
     # Requires access token from genius
     token = os.environ.get('GENIUS_TOKEN')
-    g = GeniusApi(token, 'No Porkies', 'CGM')
+    music_name = 'Wanna Know'
+    music_artist = 'Dave'
+    g = GeniusApi(token, music_name, music_artist)
     song_param = g.search(10)
-    lyrics = g.get_lyrics(song_param)
-    print(lyrics)
+    if song_param is not None:
+        lyrics = g.get_lyrics(song_param)
+        if lyrics:
+            with open(music_name + " Lyrics.txt", 'w+') as f:
+                f.write(lyrics.rstrip().strip())
+    else:
+        print(f"Lyrics for {music_name} by {music_artist} not found!")
